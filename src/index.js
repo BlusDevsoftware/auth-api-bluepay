@@ -4,6 +4,11 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 
+// Tratamento de erros não capturados
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 // Inicializa o Express
 const app = express();
 
@@ -20,13 +25,19 @@ app.get('/', (req, res) => {
   res.json({ message: 'Bem-vindo à API de Autenticação do BluePay!' });
 });
 
-// Rota de health check
+// Rota de health check melhorada
 app.get('/health', (req, res) => {
   res.json({ 
     service: 'auth-api',
     status: 'ok',
-    timestamp: new Date(),
-    version: process.env.npm_package_version || '1.0.0'
+    timestamp: new Date().toISOString(),
+    version: process.env.npm_package_version || '1.0.1',
+    env: {
+      nodeEnv: process.env.NODE_ENV,
+      hasSupabaseUrl: !!process.env.SUPABASE_URL,
+      hasSupabaseKey: !!process.env.SUPABASE_KEY,
+      hasJwtSecret: !!process.env.JWT_SECRET
+    }
   });
 });
 
