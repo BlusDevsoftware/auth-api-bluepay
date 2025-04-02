@@ -25,7 +25,7 @@ router.post('/login', async (req, res) => {
         error: process.env.NODE_ENV === 'development' ? testError.message : undefined,
         details: process.env.NODE_ENV === 'development' ? {
           supabaseUrl: process.env.SUPABASE_URL,
-          hasSupabaseKey: !!process.env.CHAVE_SUPABASE
+          hasSupabaseKey: !!process.env.SUPABASE_KEY
         } : undefined
       });
     }
