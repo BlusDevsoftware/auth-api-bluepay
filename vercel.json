@@ -15,9 +15,9 @@
   "env": {
     "NODE_ENV": "production",
     "SUPABASE_URL": "https://mtamtqtnztzceblptepy.supabase.co",
-    "CHAVE_SUPABASE": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10YW10cXRuenR6Y2VibHB0ZXB5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDExODU4MzIsImV4cCI6MjA1Njc2MTgzMn0.4S36q67tx2zrapIqEvXZu76q4dRiR3tCnanKxULdzNo",
-    "JWT_SEGREDO": "bluedev_2024_secret_key_secure_token_vercel_deploy",
+    "SUPABASE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10YW10cXRuenR6Y2VibHB0ZXB5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDExODU4MzIsImV4cCI6MjA1Njc2MTgzMn0.4S36q67tx2zrapIqEvXZu76q4dRiR3tCnanKxULdzNo",
+    "JWT_SECRET": "bluedev_2024_secret_key_secure_token_vercel_deploy",
     "URL_FRONTEND": "system-blue-2muagxayq-bluedevs-projects.vercel.app",
-    "JWT_EXPIRA_EM": "24h"
+    "JWT_EXPIRES_IN": "24h"
   }
 } 
