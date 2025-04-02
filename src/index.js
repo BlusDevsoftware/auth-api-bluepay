@@ -20,16 +20,20 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/health', (req, res) => {
-  res.json({ 
+  res.json({
     status: 'ok',
-    timestamp: new Date(),
-    version: process.env.npm_package_version || '1.0.0',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0',
     env: {
       nodeEnv: process.env.NODE_ENV,
       hasSupabaseUrl: !!process.env.SUPABASE_URL,
       hasSupabaseKey: !!process.env.SUPABASE_KEY,
       hasJwtSecret: !!process.env.JWT_SECRET,
-      hasJwtExpires: !!process.env.JWT_EXPIRES_IN
+      hasJwtExpires: !!process.env.JWT_EXPIRES_IN,
+      supabaseUrlLength: process.env.SUPABASE_URL ? process.env.SUPABASE_URL.length : 0,
+      supabaseKeyLength: process.env.SUPABASE_KEY ? process.env.SUPABASE_KEY.length : 0,
+      supabaseUrlStartsWith: process.env.SUPABASE_URL ? process.env.SUPABASE_URL.substring(0, 10) : '',
+      supabaseKeyStartsWith: process.env.SUPABASE_KEY ? process.env.SUPABASE_KEY.substring(0, 10) : ''
     }
   });
 });
