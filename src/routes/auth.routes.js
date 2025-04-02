@@ -14,7 +14,7 @@ router.post('/login', async (req, res) => {
 
     // Testa a conexão com o Supabase
     const { data: testConnection, error: testError } = await supabase
-      .from('usuários')
+      .from('usuarios')
       .select('count')
       .limit(1);
 
@@ -34,7 +34,7 @@ router.post('/login', async (req, res) => {
 
     // Verifica se o usuário existe
     const { data: user, error } = await supabase
-      .from('usuários')
+      .from('usuarios')
       .select('*')
       .eq('e-mail', email)
       .single();
@@ -94,7 +94,7 @@ router.post('/register', async (req, res) => {
 
     // Verifica se o usuário já existe
     const { data: existingUser } = await supabase
-      .from('usuários')
+      .from('usuarios')
       .select('*')
       .eq('e-mail', email)
       .single();
@@ -108,7 +108,7 @@ router.post('/register', async (req, res) => {
 
     // Cria o usuário
     const { data: newUser, error } = await supabase
-      .from('usuários')
+      .from('usuarios')
       .insert([
         {
           nome,
@@ -156,7 +156,7 @@ router.get('/verify', async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
     const { data: user, error } = await supabase
-      .from('usuários')
+      .from('usuarios')
       .select('*')
       .eq('id', decoded.userId)
       .single();
