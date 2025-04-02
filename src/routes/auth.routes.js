@@ -10,6 +10,27 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     console.log('Tentativa de login:', { email });
+    console.log('Verificando conexão com Supabase...');
+
+    // Testa a conexão com o Supabase
+    const { data: testConnection, error: testError } = await supabase
+      .from('usuarios')
+      .select('count')
+      .limit(1);
+
+    if (testError) {
+      console.error('Erro na conexão com Supabase:', testError);
+      return res.status(500).json({ 
+        message: 'Erro na conexão com o banco de dados',
+        error: process.env.NODE_ENV === 'development' ? testError.message : undefined,
+        details: process.env.NODE_ENV === 'development' ? {
+          supabaseUrl: process.env.SUPABASE_URL,
+          hasSupabaseKey: !!process.env.CHAVE_SUPABASE
+        } : undefined
+      });
+    }
+
+    console.log('Conexão com Supabase OK, buscando usuário...');
 
     // Verifica se o usuário existe
     const { data: user, error } = await supabase
@@ -20,7 +41,10 @@ router.post('/login', async (req, res) => {
 
     if (error) {
       console.error('Erro ao buscar usuário:', error);
-      return res.status(500).json({ message: 'Erro ao buscar usuário' });
+      return res.status(500).json({ 
+        message: 'Erro ao buscar usuário',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
     }
 
     if (!user) {
@@ -57,7 +81,8 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ 
       success: false,
       message: 'Erro ao fazer login',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
