@@ -27,9 +27,9 @@ app.get('/api/health', (req, res) => {
     env: {
       nodeEnv: process.env.NODE_ENV,
       hasSupabaseUrl: !!process.env.SUPABASE_URL,
-      hasSupabaseKey: !!process.env.CHAVE_SUPABASE,
-      hasJwtSecret: !!process.env.JWT_SEGREDO,
-      hasJwtExpires: !!process.env.JWT_EXPIRA_EM
+      hasSupabaseKey: !!process.env.SUPABASE_KEY,
+      hasJwtSecret: !!process.env.JWT_SECRET,
+      hasJwtExpires: !!process.env.JWT_EXPIRES_IN
     }
   });
 });
