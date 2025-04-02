@@ -53,7 +53,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Verifica a senha
-    const isValidPassword = await bcrypt.compare(password, user.senha_hash);
+    const isValidPassword = await bcrypt.compare(password, user.senha);
     if (!isValidPassword) {
       console.log('Senha inválida para o usuário:', email);
       return res.status(401).json({ message: 'Credenciais inválidas' });
@@ -67,7 +67,7 @@ router.post('/login', async (req, res) => {
     );
 
     // Remove a senha do objeto do usuário
-    delete user.senha_hash;
+    delete user.senha;
 
     console.log('Login bem-sucedido para o usuário:', email);
 
@@ -104,7 +104,7 @@ router.post('/register', async (req, res) => {
     }
 
     // Hash da senha
-    const senha_hash = await bcrypt.hash(senha, 10);
+    const senhaHash = await bcrypt.hash(senha, 10);
 
     // Cria o usuário
     const { data: newUser, error } = await supabase
@@ -113,7 +113,7 @@ router.post('/register', async (req, res) => {
         {
           nome,
           email,
-          senha_hash,
+          senha: senhaHash,
           papel: 'user',
           status: 'ativo'
         }
@@ -126,7 +126,7 @@ router.post('/register', async (req, res) => {
     }
 
     // Remove a senha do objeto do usuário
-    delete newUser.senha_hash;
+    delete newUser.senha;
 
     // Gera o token JWT
     const token = jwt.sign(
@@ -166,7 +166,7 @@ router.get('/verify', async (req, res) => {
     }
 
     // Remove a senha do objeto do usuário
-    delete user.senha_hash;
+    delete user.senha;
 
     res.json({ user });
   } catch (error) {
