@@ -48,10 +48,7 @@ router.post('/login', async (req, res) => {
         details: error.details,
         hint: error.hint
       });
-      return res.status(500).json({ 
-        message: 'Erro ao buscar usuário',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined
-      });
+      return res.status(500).json({ message: 'Erro ao buscar usuário' });
     }
 
     if (!user) {
