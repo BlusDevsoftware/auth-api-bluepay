@@ -33,6 +33,7 @@ router.post('/login', async (req, res) => {
     console.log('Conexão com Supabase OK, buscando usuário...');
 
     // Verifica se o usuário existe
+    console.log('Buscando usuário com email:', email);
     const { data: user, error } = await supabase
       .from('usuarios')
       .select('*')
@@ -41,6 +42,12 @@ router.post('/login', async (req, res) => {
 
     if (error) {
       console.error('Erro ao buscar usuário:', error);
+      console.error('Detalhes do erro:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      });
       return res.status(500).json({ 
         message: 'Erro ao buscar usuário',
         error: process.env.NODE_ENV === 'development' ? error.message : undefined
@@ -51,6 +58,8 @@ router.post('/login', async (req, res) => {
       console.log('Usuário não encontrado:', email);
       return res.status(401).json({ message: 'Credenciais inválidas' });
     }
+
+    console.log('Usuário encontrado:', { id: user.id, email: user.email, papel: user.papel });
 
     // Verifica a senha
     const isValidPassword = await bcrypt.compare(password, user.senha);
