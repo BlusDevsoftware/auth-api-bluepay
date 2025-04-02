@@ -13,6 +13,7 @@ router.post('/login', async (req, res) => {
     console.log('Verificando conexão com Supabase...');
 
     // Testa a conexão com o Supabase
+    console.log('Testando conexão com Supabase...');
     const { data: testConnection, error: testError } = await supabase
       .from('usuarios')
       .select('count')
@@ -20,6 +21,12 @@ router.post('/login', async (req, res) => {
 
     if (testError) {
       console.error('Erro na conexão com Supabase:', testError);
+      console.error('Detalhes do erro:', {
+        code: testError.code,
+        message: testError.message,
+        details: testError.details,
+        hint: testError.hint
+      });
       return res.status(500).json({ 
         message: 'Erro na conexão com o banco de dados',
         error: process.env.NODE_ENV === 'development' ? testError.message : undefined,
@@ -30,7 +37,7 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    console.log('Conexão com Supabase OK, buscando usuário...');
+    console.log('Conexão com Supabase OK, contagem de usuários:', testConnection);
 
     // Verifica se o usuário existe
     console.log('Buscando usuário com email:', email);
