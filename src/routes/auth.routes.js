@@ -36,7 +36,7 @@ router.post('/login', async (req, res) => {
     const { data: user, error } = await supabase
       .from('usuários')
       .select('*')
-      .eq('email', email)
+      .eq('e-mail', email)
       .single();
 
     if (error) {
@@ -96,7 +96,7 @@ router.post('/register', async (req, res) => {
     const { data: existingUser } = await supabase
       .from('usuários')
       .select('*')
-      .eq('email', email)
+      .eq('e-mail', email)
       .single();
 
     if (existingUser) {
@@ -112,7 +112,7 @@ router.post('/register', async (req, res) => {
       .insert([
         {
           nome,
-          email,
+          'e-mail': email,
           senha_hash,
           papel: 'user',
           status: 'ativo'
