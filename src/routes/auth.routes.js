@@ -38,8 +38,8 @@ router.post('/login', async (req, res) => {
     // Gera o token JWT
     const token = jwt.sign(
       { userId: user.id },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+      process.env.JWT_SEGREDO,
+      { expiresIn: process.env.JWT_EXPIRA_EM || '24h' }
     );
 
     // Remove a senha do objeto do usuário
@@ -106,8 +106,8 @@ router.post('/register', async (req, res) => {
     // Gera o token JWT
     const token = jwt.sign(
       { userId: newUser.id },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+      process.env.JWT_SEGREDO,
+      { expiresIn: process.env.JWT_EXPIRA_EM || '24h' }
     );
 
     res.status(201).json({
@@ -128,7 +128,7 @@ router.get('/verify', async (req, res) => {
       return res.status(401).json({ message: 'Token não fornecido' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SEGREDO);
     
     const { data: user, error } = await supabase
       .from('usuarios')
