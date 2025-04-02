@@ -1,74 +1,47 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const { createClient } = require('@supabase/supabase-js');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
-
-// Verifica as variáveis de ambiente
-let envCheck;
-try {
-  envCheck = require('./scripts/check-env').checkEnv();
-  if (!envCheck.critical) {
-    console.warn('⚠️ Atenção: Variáveis de ambiente críticas ausentes:', envCheck.missingVars);
-  }
-} catch (error) {
-  console.warn('⚠️ Não foi possível verificar variáveis de ambiente:', error.message);
-}
-
-// Tratamento de erros não capturados
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-});
-
-process.on('uncaughtException', (error) => {
-  console.error('Uncaught Exception:', error);
-});
 
 // Inicializa o Express
 const app = express();
 
 // Middleware
+app.use(express.json());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*', // Permite requisições do frontend
+  origin: '*', // Em produção, substituir pelo domínio do frontend
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json());
 
-// Rota principal
+// Configuração do Supabase
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Erro: Variáveis de ambiente do Supabase não configuradas');
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Rota de healthcheck
 app.get('/', (req, res) => {
   res.json({ message: 'Bem-vindo à API de Autenticação do BluePay!' });
 });
 
-// Rota de health check melhorada
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({ 
-    service: 'auth-api',
     status: 'ok',
-    timestamp: new Date().toISOString(),
-    version: process.env.npm_package_version || '1.0.1',
-    env: envCheck?.env || {
+    timestamp: new Date(),
+    version: process.env.npm_package_version || '1.0.0',
+    env: {
       nodeEnv: process.env.NODE_ENV,
       hasSupabaseUrl: !!process.env.SUPABASE_URL,
-      hasSupabaseKey: !!process.env.SUPABASE_KEY,
-      hasJwtSecret: !!process.env.JWT_SECRET
-    }
-  });
-});
-
-// Rotas de diagnóstico para depuração no Vercel
-app.get('/debug', (req, res) => {
-  res.json({
-    nodeVersion: process.version,
-    platform: process.platform,
-    env: {
-      NODE_ENV: process.env.NODE_ENV,
-      // Não expõe os valores reais, apenas se estão definidos
-      SUPABASE_URL: !!process.env.SUPABASE_URL,
-      SUPABASE_KEY: !!process.env.SUPABASE_KEY,
-      JWT_SECRET: !!process.env.JWT_SECRET,
-      JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '24h',
-      FRONTEND_URL: process.env.FRONTEND_URL,
+      hasSupabaseKey: !!process.env.CHAVE_SUPABASE,
+      hasJwtSecret: !!process.env.JWT_SEGREDO,
+      hasJwtExpires: !!process.env.JWT_EXPIRA_EM
     }
   });
 });
@@ -82,7 +55,8 @@ app.use((err, req, res, next) => {
   console.error('Erro na aplicação:', err);
   res.status(500).json({ 
     message: 'Erro interno do servidor',
-    error: process.env.NODE_ENV === 'development' ? err.message : 'Erro interno'
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 });
 
@@ -94,9 +68,11 @@ app.use((req, res) => {
 // Inicia o servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Servidor de autenticação rodando na porta ${PORT}`);
-  console.log('Ambiente:', process.env.NODE_ENV || 'development');
-});
-
-// Para serverless
-module.exports = app; 
+  console.log(`Servidor rodando na porta ${PORT}`);
+  console.log('Ambiente:', process.env.NODE_ENV);
+  console.log('Variáveis de ambiente:');
+  console.log('- SUPABASE_URL:', !!process.env.SUPABASE_URL);
+  console.log('- CHAVE_SUPABASE:', !!process.env.CHAVE_SUPABASE);
+  console.log('- JWT_SEGREDO:', !!process.env.JWT_SEGREDO);
+  console.log('- JWT_EXPIRA_EM:', !!process.env.JWT_EXPIRA_EM);
+}); 
