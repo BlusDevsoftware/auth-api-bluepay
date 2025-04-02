@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const { createClient } = require('@supabase/supabase-js');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 
@@ -10,21 +9,10 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: '*', // Em produção, substituir pelo domínio do frontend
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
-// Configuração do Supabase
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Erro: Variáveis de ambiente do Supabase não configuradas');
-  process.exit(1);
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Rota de healthcheck
 app.get('/', (req, res) => {
@@ -60,19 +48,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Middleware para rotas não encontradas
+// Rota 404
 app.use((req, res) => {
   res.status(404).json({ message: 'Rota não encontrada' });
 });
 
-// Inicia o servidor
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-  console.log('Ambiente:', process.env.NODE_ENV);
-  console.log('Variáveis de ambiente:');
-  console.log('- SUPABASE_URL:', !!process.env.SUPABASE_URL);
-  console.log('- CHAVE_SUPABASE:', !!process.env.CHAVE_SUPABASE);
-  console.log('- JWT_SEGREDO:', !!process.env.JWT_SEGREDO);
-  console.log('- JWT_EXPIRA_EM:', !!process.env.JWT_EXPIRA_EM);
-}); 
+// Exporta o app para o ambiente serverless
+module.exports = app; 

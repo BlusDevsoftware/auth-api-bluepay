@@ -14,12 +14,20 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error('Variáveis de ambiente do Supabase não configuradas');
 }
 
+let supabase = null;
+
 try {
   console.log('Criando cliente Supabase...');
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
   console.log('Cliente Supabase criado com sucesso!');
-  module.exports = supabase;
 } catch (error) {
   console.error('Erro ao criar cliente Supabase:', error);
   throw error;
-} 
+}
+
+module.exports = supabase; 
