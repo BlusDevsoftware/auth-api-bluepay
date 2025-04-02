@@ -32,7 +32,8 @@ router.post('/login', async (req, res) => {
         error: process.env.NODE_ENV === 'development' ? testError.message : undefined,
         details: process.env.NODE_ENV === 'development' ? {
           supabaseUrl: process.env.SUPABASE_URL,
-          hasSupabaseKey: !!process.env.SUPABASE_KEY
+          hasSupabaseKey: !!process.env.SUPABASE_KEY,
+          tableName: 'usuarios'
         } : undefined
       });
     }
@@ -47,9 +48,22 @@ router.post('/login', async (req, res) => {
 
     if (listError) {
       console.error('Erro ao listar usuários:', listError);
+      console.error('Detalhes do erro:', {
+        code: listError.code,
+        message: listError.message,
+        details: listError.details,
+        hint: listError.hint
+      });
     } else {
       console.log('Total de usuários:', allUsers.length);
-      console.log('Usuários encontrados:', allUsers.map(u => ({ id: u.id, email: u.email, papel: u.papel })));
+      console.log('Usuários encontrados:', allUsers.map(u => ({ 
+        id: u.id, 
+        email: u.email, 
+        papel: u.papel,
+        status: u.status,
+        created_at: u.created_at,
+        updated_at: u.updated_at
+      })));
     }
 
     // Verifica se o usuário existe
@@ -66,7 +80,8 @@ router.post('/login', async (req, res) => {
         code: error.code,
         message: error.message,
         details: error.details,
-        hint: error.hint
+        hint: error.hint,
+        query: { email, table: 'usuarios' }
       });
       return res.status(500).json({ message: 'Erro ao buscar usuário' });
     }
@@ -76,7 +91,14 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Credenciais inválidas' });
     }
 
-    console.log('Usuário encontrado:', { id: user.id, email: user.email, papel: user.papel });
+    console.log('Usuário encontrado:', { 
+      id: user.id, 
+      email: user.email, 
+      papel: user.papel,
+      status: user.status,
+      created_at: user.created_at,
+      updated_at: user.updated_at
+    });
 
     // Verifica a senha
     const isValidPassword = await bcrypt.compare(password, user.senha);
