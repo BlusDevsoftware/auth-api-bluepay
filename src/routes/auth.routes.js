@@ -39,6 +39,19 @@ router.post('/login', async (req, res) => {
 
     console.log('Conexão com Supabase OK, contagem de usuários:', testConnection);
 
+    // Lista todos os usuários para debug
+    console.log('Listando todos os usuários...');
+    const { data: allUsers, error: listError } = await supabase
+      .from('usuarios')
+      .select('*');
+
+    if (listError) {
+      console.error('Erro ao listar usuários:', listError);
+    } else {
+      console.log('Total de usuários:', allUsers.length);
+      console.log('Usuários encontrados:', allUsers.map(u => ({ id: u.id, email: u.email, papel: u.papel })));
+    }
+
     // Verifica se o usuário existe
     console.log('Buscando usuário com email:', email);
     const { data: user, error } = await supabase
