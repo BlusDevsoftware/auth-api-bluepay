@@ -41,6 +41,18 @@ supabase.from('usuarios').select('count').limit(1)
     } else {
       console.log('Conexão com Supabase estabelecida com sucesso!');
       console.log('Teste de contagem:', data);
+
+      // Verifica a estrutura da tabela
+      console.log('Verificando estrutura da tabela...');
+      supabase.from('usuarios').select('*').limit(1)
+        .then(({ data: tableData, error: tableError }) => {
+          if (tableError) {
+            console.error('Erro ao verificar estrutura:', tableError);
+          } else if (tableData && tableData.length > 0) {
+            console.log('Estrutura da tabela:', Object.keys(tableData[0]));
+            console.log('Primeiro registro:', tableData[0]);
+          }
+        });
     }
   })
   .catch(err => {
