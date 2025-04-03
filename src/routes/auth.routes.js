@@ -74,8 +74,8 @@ router.post('/login', async (req, res) => {
         email: u.email, 
         papel: u.papel,
         status: u.status,
-        created_at: u.created_at,
-        updated_at: u.updated_at
+        criado_em: u.criado_em,
+        atualizado_em: u.atualizado_em
       })));
     }
 
@@ -101,24 +101,6 @@ router.post('/login', async (req, res) => {
 
     if (!user) {
       console.log('Usuário não encontrado:', email);
-      // Lista todos os usuários para debug
-      const { data: allUsers, error: listError } = await supabase
-        .from('usuarios')
-        .select('*');
-
-      if (listError) {
-        console.error('Erro ao listar usuários:', listError);
-      } else {
-        console.log('Total de usuários:', allUsers.length);
-        console.log('Usuários encontrados:', allUsers.map(u => ({ 
-          id: u.id, 
-          email: u.email, 
-          papel: u.papel,
-          status: u.status,
-          created_at: u.created_at,
-          updated_at: u.updated_at
-        })));
-      }
       return res.status(401).json({ message: 'Credenciais inválidas' });
     }
 
@@ -127,8 +109,8 @@ router.post('/login', async (req, res) => {
       email: user.email, 
       papel: user.papel,
       status: user.status,
-      created_at: user.created_at,
-      updated_at: user.updated_at
+      criado_em: user.criado_em,
+      atualizado_em: user.atualizado_em
     });
 
     // Verifica a senha
@@ -284,8 +266,8 @@ router.get('/debug/users', async (req, res) => {
         email: u.email,
         papel: u.papel,
         status: u.status,
-        created_at: u.created_at,
-        updated_at: u.updated_at
+        criado_em: u.criado_em,
+        atualizado_em: u.atualizado_em
       }))
     });
   } catch (err) {
