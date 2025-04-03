@@ -53,6 +53,25 @@ supabase.from('usuarios').select('count').limit(1)
             console.log('Primeiro registro:', tableData[0]);
           }
         });
+
+      // Lista todos os usuários para debug
+      console.log('Listando todos os usuários...');
+      supabase.from('usuarios').select('*')
+        .then(({ data: users, error: usersError }) => {
+          if (usersError) {
+            console.error('Erro ao listar usuários:', usersError);
+          } else {
+            console.log('Total de usuários:', users.length);
+            console.log('Usuários encontrados:', users.map(u => ({
+              id: u.id,
+              email: u.email,
+              papel: u.papel,
+              status: u.status,
+              criado_em: u.criado_em,
+              atualizado_em: u.atualizado_em
+            })));
+          }
+        });
     }
   })
   .catch(err => {
