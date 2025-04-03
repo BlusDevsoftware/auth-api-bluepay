@@ -50,7 +50,10 @@ supabase.from('usuarios').select('count').limit(1)
             console.error('Erro ao verificar estrutura:', tableError);
           } else if (tableData && tableData.length > 0) {
             console.log('Estrutura da tabela:', Object.keys(tableData[0]));
-            console.log('Primeiro registro:', tableData[0]);
+            console.log('Primeiro registro:', {
+              ...tableData[0],
+              senha: tableData[0].senha ? '***' : undefined
+            });
           }
         });
 
@@ -68,7 +71,8 @@ supabase.from('usuarios').select('count').limit(1)
               papel: u.papel,
               status: u.status,
               criado_em: u.criado_em,
-              atualizado_em: u.atualizado_em
+              atualizado_em: u.atualizado_em,
+              senha: u.senha ? '***' : undefined
             })));
           }
         });
