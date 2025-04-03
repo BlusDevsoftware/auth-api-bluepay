@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
+const colaboradoresRoutes = require('./routes/colaboradores.routes');
 
 // Inicializa o Express
 const app = express();
@@ -41,6 +42,7 @@ app.get('/api/health', (req, res) => {
 // Usa as rotas
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/colaboradores', colaboradoresRoutes);
 
 // Middleware de erro
 app.use((err, req, res, next) => {

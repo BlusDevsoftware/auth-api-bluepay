@@ -2,10 +2,10 @@
   "name": "auth-api-bluepay",
   "version": "1.0.0",
   "description": "API de autenticação e usuários para o sistema BluePay",
-  "main": "src/index.js",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -17,6 +17,7 @@
   "license": "MIT",
   "dependencies": {
     "@supabase/supabase-js": "^2.39.6",
+    "axios": "^1.8.4",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -29,4 +30,4 @@
   "engines": {
     "node": ">=14.0.0"
   }
-} 
+}

@@ -1,144 +1,104 @@
 const express = require('express');
 const router = express.Router();
-const { pool } = require('../config/database');
-const { authenticateToken } = require('../middleware/auth');
+const axios = require('axios');
+const ApiConfig = require('../config/api-config');
+const authMiddleware = require('../middleware/auth.middleware');
+
+// Middleware de autenticação para todas as rotas
+router.use(authMiddleware);
 
 // Listar todos os colaboradores
-router.get('/', authenticateToken, async (req, res) => {
+router.get('/', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM colaboradores ORDER BY nome');
-        res.json(result.rows);
+        const response = await axios.get(ApiConfig.endpoints.colaboradores.list, {
+            headers: {
+                Authorization: req.headers.authorization
+            }
+        });
+        res.json(response.data);
     } catch (error) {
-        console.error('Erro ao listar colaboradores:', error);
-        res.status(500).json({ message: 'Erro ao listar colaboradores' });
+        console.error('Erro ao listar colaboradores:', error.response?.data || error.message);
+        res.status(error.response?.status || 500).json({ 
+            message: 'Erro ao listar colaboradores',
+            error: error.response?.data || error.message
+        });
     }
 });
 
 // Buscar colaborador por ID
-router.get('/:id', authenticateToken, async (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const result = await pool.query('SELECT * FROM colaboradores WHERE id = $1', [id]);
-        
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'Colaborador não encontrado' });
-        }
-        
-        res.json(result.rows[0]);
+        const response = await axios.get(ApiConfig.endpoints.colaboradores.get(id), {
+            headers: {
+                Authorization: req.headers.authorization
+            }
+        });
+        res.json(response.data);
     } catch (error) {
-        console.error('Erro ao buscar colaborador:', error);
-        res.status(500).json({ message: 'Erro ao buscar colaborador' });
+        console.error('Erro ao buscar colaborador:', error.response?.data || error.message);
+        res.status(error.response?.status || 500).json({ 
+            message: 'Erro ao buscar colaborador',
+            error: error.response?.data || error.message
+        });
     }
 });
 
 // Criar novo colaborador
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', async (req, res) => {
     try {
-        const {
-            nome,
-            email,
-            telefone,
-            departamento,
-            cargo,
-            data_admissao,
-            percentual_comissao,
-            status,
-            observacoes
-        } = req.body;
-
-        // Validar campos obrigatórios
-        if (!nome || !email || !telefone || !departamento || !cargo || !data_admissao || !percentual_comissao) {
-            return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos' });
-        }
-
-        // Verificar se o email já existe
-        const emailCheck = await pool.query('SELECT id FROM colaboradores WHERE email = $1', [email]);
-        if (emailCheck.rows.length > 0) {
-            return res.status(400).json({ message: 'Email já cadastrado' });
-        }
-
-        const result = await pool.query(
-            `INSERT INTO colaboradores (
-                nome, email, telefone, departamento, cargo, 
-                data_admissao, percentual_comissao, status, observacoes
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
-            RETURNING *`,
-            [nome, email, telefone, departamento, cargo, data_admissao, percentual_comissao, status, observacoes]
-        );
-
-        res.status(201).json(result.rows[0]);
+        const response = await axios.post(ApiConfig.endpoints.colaboradores.create, req.body, {
+            headers: {
+                Authorization: req.headers.authorization,
+                'Content-Type': 'application/json'
+            }
+        });
+        res.status(201).json(response.data);
     } catch (error) {
-        console.error('Erro ao criar colaborador:', error);
-        res.status(500).json({ message: 'Erro ao criar colaborador' });
+        console.error('Erro ao criar colaborador:', error.response?.data || error.message);
+        res.status(error.response?.status || 500).json({ 
+            message: 'Erro ao criar colaborador',
+            error: error.response?.data || error.message
+        });
     }
 });
 
 // Atualizar colaborador
-router.put('/:id', authenticateToken, async (req, res) => {
+router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const {
-            nome,
-            email,
-            telefone,
-            departamento,
-            cargo,
-            data_admissao,
-            percentual_comissao,
-            status,
-            observacoes
-        } = req.body;
-
-        // Validar campos obrigatórios
-        if (!nome || !email || !telefone || !departamento || !cargo || !data_admissao || !percentual_comissao) {
-            return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos' });
-        }
-
-        // Verificar se o email já existe para outro colaborador
-        const emailCheck = await pool.query(
-            'SELECT id FROM colaboradores WHERE email = $1 AND id != $2',
-            [email, id]
-        );
-        if (emailCheck.rows.length > 0) {
-            return res.status(400).json({ message: 'Email já cadastrado para outro colaborador' });
-        }
-
-        const result = await pool.query(
-            `UPDATE colaboradores 
-            SET nome = $1, email = $2, telefone = $3, departamento = $4, 
-                cargo = $5, data_admissao = $6, percentual_comissao = $7, 
-                status = $8, observacoes = $9
-            WHERE id = $10 
-            RETURNING *`,
-            [nome, email, telefone, departamento, cargo, data_admissao, 
-             percentual_comissao, status, observacoes, id]
-        );
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'Colaborador não encontrado' });
-        }
-
-        res.json(result.rows[0]);
+        const response = await axios.put(ApiConfig.endpoints.colaboradores.update(id), req.body, {
+            headers: {
+                Authorization: req.headers.authorization,
+                'Content-Type': 'application/json'
+            }
+        });
+        res.json(response.data);
     } catch (error) {
-        console.error('Erro ao atualizar colaborador:', error);
-        res.status(500).json({ message: 'Erro ao atualizar colaborador' });
+        console.error('Erro ao atualizar colaborador:', error.response?.data || error.message);
+        res.status(error.response?.status || 500).json({ 
+            message: 'Erro ao atualizar colaborador',
+            error: error.response?.data || error.message
+        });
     }
 });
 
-// Excluir colaborador
-router.delete('/:id', authenticateToken, async (req, res) => {
+// Deletar colaborador
+router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const result = await pool.query('DELETE FROM colaboradores WHERE id = $1 RETURNING *', [id]);
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'Colaborador não encontrado' });
-        }
-
-        res.json({ message: 'Colaborador excluído com sucesso' });
+        const response = await axios.delete(ApiConfig.endpoints.colaboradores.delete(id), {
+            headers: {
+                Authorization: req.headers.authorization
+            }
+        });
+        res.json(response.data);
     } catch (error) {
-        console.error('Erro ao excluir colaborador:', error);
-        res.status(500).json({ message: 'Erro ao excluir colaborador' });
+        console.error('Erro ao deletar colaborador:', error.response?.data || error.message);
+        res.status(error.response?.status || 500).json({ 
+            message: 'Erro ao deletar colaborador',
+            error: error.response?.data || error.message
+        });
     }
 });
 
