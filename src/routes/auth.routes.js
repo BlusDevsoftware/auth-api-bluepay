@@ -101,7 +101,12 @@ router.post('/login', async (req, res) => {
     });
 
     // Verifica a senha
+    console.log('Verificando senha...');
+    console.log('Senha fornecida:', password);
+    console.log('Hash da senha no banco:', user.senha);
     const isValidPassword = await bcrypt.compare(password, user.senha);
+    console.log('Resultado da comparação:', isValidPassword);
+    
     if (!isValidPassword) {
       console.log('Senha inválida para o usuário:', email);
       return res.status(401).json({ message: 'Credenciais inválidas' });
