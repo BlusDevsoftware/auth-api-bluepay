@@ -160,27 +160,70 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Registro (não usado na interface atual, mas mantido para completude da API)
+// Registro de usuários
 router.post('/register', async (req, res) => {
   try {
     const { nome, email, senha } = req.body;
 
+    // Validações básicas
+    if (!nome || !email || !senha) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Todos os campos são obrigatórios',
+        missingFields: {
+          nome: !nome,
+          email: !email,
+          senha: !senha
+        }
+      });
+    }
+
+    // Validação de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Email inválido'
+      });
+    }
+
+    // Validação de senha
+    if (senha.length < 6) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'A senha deve ter no mínimo 6 caracteres'
+      });
+    }
+
+    console.log('Tentativa de registro:', { email, nome });
+
     // Verifica se o usuário já existe
-    const { data: existingUser } = await supabase
+    const { data: existingUser, error: checkError } = await supabase
       .from('usuarios')
       .select('*')
       .eq('email', email)
       .single();
 
+    if (checkError && checkError.code !== 'PGRST116') { // PGRST116 é o código para "não encontrado"
+      console.error('Erro ao verificar usuário existente:', checkError);
+      return res.status(500).json({ 
+        success: false,
+        message: 'Erro ao verificar usuário existente'
+      });
+    }
+
     if (existingUser) {
-      return res.status(400).json({ message: 'Email já cadastrado' });
+      return res.status(400).json({ 
+        success: false,
+        message: 'Email já cadastrado'
+      });
     }
 
     // Hash da senha
     const senhaHash = await bcrypt.hash(senha, 10);
 
     // Cria o usuário
-    const { data: newUser, error } = await supabase
+    const { data: newUser, error: createError } = await supabase
       .from('usuarios')
       .insert([
         {
@@ -194,8 +237,13 @@ router.post('/register', async (req, res) => {
       .select()
       .single();
 
-    if (error) {
-      throw error;
+    if (createError) {
+      console.error('Erro ao criar usuário:', createError);
+      return res.status(500).json({ 
+        success: false,
+        message: 'Erro ao criar usuário',
+        error: process.env.NODE_ENV === 'development' ? createError.message : undefined
+      });
     }
 
     // Remove a senha do objeto do usuário
@@ -208,13 +256,20 @@ router.post('/register', async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
     );
 
+    console.log('Usuário registrado com sucesso:', { email, id: newUser.id });
+
     res.status(201).json({
+      success: true,
       user: newUser,
       token
     });
   } catch (error) {
     console.error('Erro no registro:', error);
-    res.status(500).json({ message: 'Erro ao registrar usuário' });
+    res.status(500).json({ 
+      success: false,
+      message: 'Erro ao registrar usuário',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
@@ -320,6 +375,43 @@ router.get('/debug/admin', async (req, res) => {
   } catch (err) {
     console.error('Erro ao verificar admin:', err);
     return res.status(500).json({ message: 'Erro ao verificar admin', error: err.message });
+  }
+});
+
+// Rota temporária para atualizar a senha do admin (apenas para debug)
+router.post('/debug/admin/update-password', async (req, res) => {
+  try {
+    console.log('Atualizando senha do admin...');
+    
+    // Gera o hash da senha
+    const senhaHash = await bcrypt.hash('admin123', 10);
+    console.log('Novo hash gerado:', senhaHash);
+
+    // Atualiza a senha do admin
+    const { data: admin, error } = await supabase
+      .from('usuarios')
+      .update({ senha: senhaHash })
+      .eq('email', 'admin@bluepay.com')
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Erro ao atualizar senha:', error);
+      return res.status(500).json({ message: 'Erro ao atualizar senha', error: error.message });
+    }
+
+    return res.json({
+      message: 'Senha atualizada com sucesso',
+      id: admin.id,
+      email: admin.email,
+      papel: admin.papel,
+      status: admin.status,
+      senha_length: admin.senha ? admin.senha.length : 0,
+      senha_starts_with: admin.senha ? admin.senha.substring(0, 10) : null
+    });
+  } catch (err) {
+    console.error('Erro ao atualizar senha:', err);
+    return res.status(500).json({ message: 'Erro ao atualizar senha', error: err.message });
   }
 });
 
