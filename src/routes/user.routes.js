@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
   try {
     const { data: users, error } = await supabase
       .from('usuarios')
-      .select('id, nome, email, papel, status, criado_em, atualizado_em');
+      .select('id, email, papel, status, created_at, updated_at');
 
     if (error) throw error;
 
@@ -30,7 +30,7 @@ router.get('/:id', async (req, res) => {
 
     const { data: user, error } = await supabase
       .from('usuarios')
-      .select('id, nome, email, papel, status, criado_em, atualizado_em')
+      .select('id, email, papel, status, created_at, updated_at')
       .eq('id', id)
       .single();
 
@@ -132,12 +132,11 @@ router.put('/:id', async (req, res) => {
     const { nome, email, senha, papel, status, observacoes } = req.body;
 
     const updateData = {
-      nome,
       email,
       papel,
       status,
       observacoes,
-      atualizado_em: new Date()
+      updated_at: new Date()
     };
 
     // Se uma nova senha foi fornecida, faz o hash
@@ -149,7 +148,7 @@ router.put('/:id', async (req, res) => {
       .from('usuarios')
       .update(updateData)
       .eq('id', id)
-      .select('id, nome, email, papel, status, criado_em, atualizado_em')
+      .select('id, email, papel, status, created_at, updated_at')
       .single();
 
     if (error) {
