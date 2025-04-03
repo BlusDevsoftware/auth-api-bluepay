@@ -16,7 +16,7 @@ CREATE TABLE usuarios (
 INSERT INTO usuarios (email, senha, papel, status)
 VALUES (
   'admin@bluepay.com',
-  '$2a$10$N7RbF0Nk0k4kPFqXEXfzKuAhwXULtJHW8QqYq5jXoFHmqRYBGaEOO',
+  '$2a$10$fLeTFbmwlUtJoY/u9.MvTOnraEs5QQZ/yEnG4UboW0MtXnZ1xpHjq',
   'admin',
   'ativo'
 )
