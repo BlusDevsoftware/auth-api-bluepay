@@ -118,6 +118,8 @@ router.post('/login', async (req, res) => {
     console.log('Verificando senha...');
     console.log('Senha fornecida:', password);
     console.log('Hash da senha no banco:', user.senha ? '***' : undefined);
+    console.log('Tipo da senha fornecida:', typeof password);
+    console.log('Tipo da senha no banco:', typeof user.senha);
     const isValidPassword = await bcrypt.compare(password, user.senha);
     console.log('Resultado da comparação:', isValidPassword);
     
