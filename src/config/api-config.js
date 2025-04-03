@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://auth-api-bluepay.vercel.app';
+const API_BASE_URL = 'https://api-bluepay.vercel.app';
 
 const ApiConfig = {
     baseUrl: API_BASE_URL,
