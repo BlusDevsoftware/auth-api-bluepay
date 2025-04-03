@@ -53,4 +53,40 @@ SELECT
   atualizado_em,
   CASE WHEN senha IS NOT NULL THEN '***' ELSE NULL END as senha
 FROM usuarios 
-WHERE email = 'admin@bluepay.com'; 
+WHERE email = 'admin@bluepay.com';
+
+-- Tabela de Colaboradores
+CREATE TABLE IF NOT EXISTS colaboradores (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    telefone VARCHAR(20) NOT NULL,
+    departamento VARCHAR(50) NOT NULL,
+    cargo VARCHAR(50) NOT NULL,
+    data_admissao DATE NOT NULL,
+    percentual_comissao DECIMAL(5,2) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'ativo',
+    observacoes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Trigger para atualizar o updated_at
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_colaboradores_updated_at
+    BEFORE UPDATE ON colaboradores
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Índices para melhor performance
+CREATE INDEX idx_colaboradores_email ON colaboradores(email);
+CREATE INDEX idx_colaboradores_departamento ON colaboradores(departamento);
+CREATE INDEX idx_colaboradores_status ON colaboradores(status);
+CREATE INDEX idx_colaboradores_cargo ON colaboradores(cargo); 
