@@ -40,6 +40,19 @@ router.post('/login', async (req, res) => {
 
     console.log('Conexão com Supabase OK, contagem de usuários:', testConnection);
 
+    // Verifica a estrutura da tabela
+    console.log('Verificando estrutura da tabela...');
+    const { data: tableInfo, error: tableError } = await supabase
+      .from('usuarios')
+      .select('*')
+      .limit(1);
+
+    if (tableError) {
+      console.error('Erro ao verificar estrutura da tabela:', tableError);
+    } else if (tableInfo && tableInfo.length > 0) {
+      console.log('Estrutura da tabela:', Object.keys(tableInfo[0]));
+    }
+
     // Lista todos os usuários para debug
     console.log('Listando todos os usuários...');
     const { data: allUsers, error: listError } = await supabase
