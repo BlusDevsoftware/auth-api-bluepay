@@ -163,15 +163,14 @@ router.post('/login', async (req, res) => {
 // Registro de usuários
 router.post('/register', async (req, res) => {
   try {
-    const { nome, email, senha } = req.body;
+    const { email, senha } = req.body;
 
     // Validações básicas
-    if (!nome || !email || !senha) {
-      return res.status(400).json({ 
+    if (!email || !senha) {
+      return res.status(400).json({
         success: false,
         message: 'Todos os campos são obrigatórios',
         missingFields: {
-          nome: !nome,
           email: !email,
           senha: !senha
         }
@@ -195,7 +194,7 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    console.log('Tentativa de registro:', { email, nome });
+    console.log('Tentativa de registro:', { email });
 
     // Verifica se o usuário já existe
     const { data: existingUser, error: checkError } = await supabase
@@ -227,7 +226,6 @@ router.post('/register', async (req, res) => {
       .from('usuarios')
       .insert([
         {
-          nome,
           email,
           senha: senhaHash,
           papel: 'user',
