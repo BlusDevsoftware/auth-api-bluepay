@@ -122,6 +122,8 @@ router.post('/login', async (req, res) => {
     console.log('Tipo da senha no banco:', typeof user.senha);
     console.log('Comprimento da senha fornecida:', password.length);
     console.log('Comprimento da senha no banco:', user.senha.length);
+    console.log('Primeiros 10 caracteres da senha fornecida:', password.substring(0, 10));
+    console.log('Primeiros 10 caracteres da senha no banco:', user.senha.substring(0, 10));
     const isValidPassword = await bcrypt.compare(password, user.senha);
     console.log('Resultado da comparação:', isValidPassword);
     
