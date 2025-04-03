@@ -101,6 +101,24 @@ router.post('/login', async (req, res) => {
 
     if (!user) {
       console.log('Usuário não encontrado:', email);
+      // Lista todos os usuários para debug
+      const { data: allUsers, error: listError } = await supabase
+        .from('usuarios')
+        .select('*');
+
+      if (listError) {
+        console.error('Erro ao listar usuários:', listError);
+      } else {
+        console.log('Total de usuários:', allUsers.length);
+        console.log('Usuários encontrados:', allUsers.map(u => ({ 
+          id: u.id, 
+          email: u.email, 
+          papel: u.papel,
+          status: u.status,
+          created_at: u.created_at,
+          updated_at: u.updated_at
+        })));
+      }
       return res.status(401).json({ message: 'Credenciais inválidas' });
     }
 
