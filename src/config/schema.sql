@@ -35,4 +35,7 @@ DROP TRIGGER IF EXISTS update_usuarios_updated_at ON usuarios;
 CREATE TRIGGER update_usuarios_updated_at
   BEFORE UPDATE ON usuarios
   FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column(); 
+  EXECUTE FUNCTION update_updated_at_column();
+
+-- Verifica se o usuário admin foi criado corretamente
+SELECT * FROM usuarios WHERE email = 'admin@bluepay.com'; 
