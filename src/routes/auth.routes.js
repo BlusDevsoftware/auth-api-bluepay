@@ -230,4 +230,37 @@ router.get('/verify', async (req, res) => {
   }
 });
 
+// Rota temporária para listar todos os usuários (apenas para debug)
+router.get('/debug/users', async (req, res) => {
+  try {
+    console.log('Listando todos os usuários...');
+    const { data: users, error } = await supabase
+      .from('usuarios')
+      .select('*');
+
+    if (error) {
+      console.error('Erro ao listar usuários:', error);
+      return res.status(500).json({ message: 'Erro ao listar usuários', error: error.message });
+    }
+
+    console.log('Total de usuários:', users.length);
+    console.log('Usuários:', users);
+
+    return res.json({
+      total: users.length,
+      users: users.map(u => ({
+        id: u.id,
+        email: u.email,
+        papel: u.papel,
+        status: u.status,
+        created_at: u.created_at,
+        updated_at: u.updated_at
+      }))
+    });
+  } catch (err) {
+    console.error('Erro ao listar usuários:', err);
+    return res.status(500).json({ message: 'Erro ao listar usuários', error: err.message });
+  }
+});
+
 module.exports = router; 
