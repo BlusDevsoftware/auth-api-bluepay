@@ -283,4 +283,44 @@ router.get('/debug/users', async (req, res) => {
   }
 });
 
+// Rota temporária para verificar o usuário admin (apenas para debug)
+router.get('/debug/admin', async (req, res) => {
+  try {
+    console.log('Verificando usuário admin...');
+    const { data: admin, error } = await supabase
+      .from('usuarios')
+      .select('*')
+      .eq('email', 'admin@bluepay.com')
+      .single();
+
+    if (error) {
+      console.error('Erro ao buscar admin:', error);
+      return res.status(500).json({ message: 'Erro ao buscar admin', error: error.message });
+    }
+
+    if (!admin) {
+      return res.status(404).json({ message: 'Usuário admin não encontrado' });
+    }
+
+    // Gera um novo hash da senha 'admin123' para comparação
+    const newHash = await bcrypt.hash('admin123', 10);
+    console.log('Hash atual no banco:', admin.senha);
+    console.log('Novo hash gerado:', newHash);
+
+    return res.json({
+      id: admin.id,
+      email: admin.email,
+      papel: admin.papel,
+      status: admin.status,
+      senha_length: admin.senha ? admin.senha.length : 0,
+      senha_starts_with: admin.senha ? admin.senha.substring(0, 10) : null,
+      criado_em: admin.criado_em,
+      atualizado_em: admin.atualizado_em
+    });
+  } catch (err) {
+    console.error('Erro ao verificar admin:', err);
+    return res.status(500).json({ message: 'Erro ao verificar admin', error: err.message });
+  }
+});
+
 module.exports = router; 
