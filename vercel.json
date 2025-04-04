@@ -19,5 +19,10 @@
     "JWT_SECRET": "EtYfW8HhBD67MxCxYa6goLztOm941a5USI80dnYEvRD7iBL0zN+tkrlxJWTSpUullKl693nFUqpDMg+Iuro9xQ==",
     "URL_FRONTEND": "system-blue-2muagxayq-bluedevs-projects.vercel.app",
     "JWT_EXPIRES_IN": "24h"
+  },
+  "build": {
+    "env": {
+      "NODE_ENV": "production"
+    }
   }
 } 

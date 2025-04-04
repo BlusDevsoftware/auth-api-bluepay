@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/auth.routes');
@@ -30,7 +31,11 @@ app.get('/api/health', (req, res) => {
       hasSupabaseUrl: !!process.env.SUPABASE_URL,
       hasSupabaseKey: !!process.env.SUPABASE_KEY,
       hasJwtSecret: !!process.env.JWT_SECRET,
-      hasJwtExpires: !!process.env.JWT_EXPIRES_IN
+      hasJwtExpires: !!process.env.JWT_EXPIRES_IN,
+      supabaseUrlLength: process.env.SUPABASE_URL ? process.env.SUPABASE_URL.length : 0,
+      supabaseKeyLength: process.env.SUPABASE_KEY ? process.env.SUPABASE_KEY.length : 0,
+      supabaseUrlStartsWith: process.env.SUPABASE_URL ? process.env.SUPABASE_URL.substring(0, 10) : '',
+      supabaseKeyStartsWith: process.env.SUPABASE_KEY ? process.env.SUPABASE_KEY.substring(0, 10) : ''
     }
   });
 });
@@ -56,9 +61,4 @@ app.use((req, res) => {
 });
 
 // Exporta o app para o ambiente serverless
-module.exports = app;
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
-}); 
+module.exports = app; 

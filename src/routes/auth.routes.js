@@ -9,78 +9,16 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email e senha são obrigatórios'
+      });
+    }
+
     console.log('Tentativa de login:', { email });
-    console.log('Verificando conexão com Supabase...');
-
-    // Testa a conexão com o Supabase
-    console.log('Testando conexão com Supabase...');
-    const { data: testConnection, error: testError } = await supabase
-      .from('usuarios')
-      .select('count')
-      .limit(1);
-
-    if (testError) {
-      console.error('Erro na conexão com Supabase:', testError);
-      console.error('Detalhes do erro:', {
-        code: testError.code,
-        message: testError.message,
-        details: testError.details,
-        hint: testError.hint
-      });
-      return res.status(500).json({ 
-        message: 'Erro na conexão com o banco de dados',
-        error: process.env.NODE_ENV === 'development' ? testError.message : undefined,
-        details: process.env.NODE_ENV === 'development' ? {
-          supabaseUrl: process.env.SUPABASE_URL,
-          hasSupabaseKey: !!process.env.SUPABASE_KEY,
-          tableName: 'usuarios'
-        } : undefined
-      });
-    }
-
-    console.log('Conexão com Supabase OK, contagem de usuários:', testConnection);
-
-    // Verifica a estrutura da tabela
-    console.log('Verificando estrutura da tabela...');
-    const { data: tableInfo, error: tableError } = await supabase
-      .from('usuarios')
-      .select('*')
-      .limit(1);
-
-    if (tableError) {
-      console.error('Erro ao verificar estrutura da tabela:', tableError);
-    } else if (tableInfo && tableInfo.length > 0) {
-      console.log('Estrutura da tabela:', Object.keys(tableInfo[0]));
-    }
-
-    // Lista todos os usuários para debug
-    console.log('Listando todos os usuários...');
-    const { data: allUsers, error: listError } = await supabase
-      .from('usuarios')
-      .select('*');
-
-    if (listError) {
-      console.error('Erro ao listar usuários:', listError);
-      console.error('Detalhes do erro:', {
-        code: listError.code,
-        message: listError.message,
-        details: listError.details,
-        hint: listError.hint
-      });
-    } else {
-      console.log('Total de usuários:', allUsers.length);
-      console.log('Usuários encontrados:', allUsers.map(u => ({ 
-        id: u.id, 
-        email: u.email, 
-        papel: u.papel,
-        status: u.status,
-        criado_em: u.criado_em,
-        atualizado_em: u.atualizado_em
-      })));
-    }
 
     // Verifica se o usuário existe
-    console.log('Buscando usuário com email:', email);
     const { data: user, error } = await supabase
       .from('usuarios')
       .select('*')
@@ -89,47 +27,30 @@ router.post('/login', async (req, res) => {
 
     if (error) {
       console.error('Erro ao buscar usuário:', error);
-      console.error('Detalhes do erro:', {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        query: { email, table: 'usuarios' }
+      return res.status(500).json({ 
+        success: false,
+        message: 'Erro ao buscar usuário',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
       });
-      return res.status(500).json({ message: 'Erro ao buscar usuário' });
     }
 
     if (!user) {
       console.log('Usuário não encontrado:', email);
-      return res.status(401).json({ message: 'Credenciais inválidas' });
+      return res.status(401).json({ 
+        success: false,
+        message: 'Credenciais inválidas' 
+      });
     }
 
-    console.log('Usuário encontrado:', { 
-      id: user.id, 
-      email: user.email, 
-      papel: user.papel,
-      status: user.status,
-      criado_em: user.criado_em,
-      atualizado_em: user.atualizado_em,
-      senha: user.senha ? '***' : undefined
-    });
-
     // Verifica a senha
-    console.log('Verificando senha...');
-    console.log('Senha fornecida:', password);
-    console.log('Hash da senha no banco:', user.senha ? '***' : undefined);
-    console.log('Tipo da senha fornecida:', typeof password);
-    console.log('Tipo da senha no banco:', typeof user.senha);
-    console.log('Comprimento da senha fornecida:', password.length);
-    console.log('Comprimento da senha no banco:', user.senha.length);
-    console.log('Primeiros 10 caracteres da senha fornecida:', password.substring(0, 10));
-    console.log('Primeiros 10 caracteres da senha no banco:', user.senha.substring(0, 10));
     const isValidPassword = await bcrypt.compare(password, user.senha);
-    console.log('Resultado da comparação:', isValidPassword);
     
     if (!isValidPassword) {
       console.log('Senha inválida para o usuário:', email);
-      return res.status(401).json({ message: 'Credenciais inválidas' });
+      return res.status(401).json({ 
+        success: false,
+        message: 'Credenciais inválidas' 
+      });
     }
 
     // Gera o token JWT
@@ -154,8 +75,7 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ 
       success: false,
       message: 'Erro ao fazer login',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
