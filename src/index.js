@@ -30,11 +30,7 @@ app.get('/api/health', (req, res) => {
       hasSupabaseUrl: !!process.env.SUPABASE_URL,
       hasSupabaseKey: !!process.env.SUPABASE_KEY,
       hasJwtSecret: !!process.env.JWT_SECRET,
-      hasJwtExpires: !!process.env.JWT_EXPIRES_IN,
-      supabaseUrlLength: process.env.SUPABASE_URL ? process.env.SUPABASE_URL.length : 0,
-      supabaseKeyLength: process.env.SUPABASE_KEY ? process.env.SUPABASE_KEY.length : 0,
-      supabaseUrlStartsWith: process.env.SUPABASE_URL ? process.env.SUPABASE_URL.substring(0, 10) : '',
-      supabaseKeyStartsWith: process.env.SUPABASE_KEY ? process.env.SUPABASE_KEY.substring(0, 10) : ''
+      hasJwtExpires: !!process.env.JWT_EXPIRES_IN
     }
   });
 });
