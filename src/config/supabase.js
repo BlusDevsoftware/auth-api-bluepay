@@ -3,18 +3,7 @@ const { createClient } = require('@supabase/supabase-js');
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
 
-console.log('Configurando Supabase...');
-console.log('URL:', supabaseUrl);
-console.log('Key exists:', !!supabaseKey);
-console.log('Key length:', supabaseKey ? supabaseKey.length : 0);
-console.log('Key starts with:', supabaseKey ? supabaseKey.substring(0, 10) : '');
-
 if (!supabaseUrl || !supabaseKey) {
-  console.error('Erro: Variáveis de ambiente do Supabase não configuradas');
-  console.error('URL:', supabaseUrl);
-  console.error('Key exists:', !!supabaseKey);
-  console.error('Key length:', supabaseKey ? supabaseKey.length : 0);
-  console.error('Key starts with:', supabaseKey ? supabaseKey.substring(0, 10) : '');
   throw new Error('Variáveis de ambiente do Supabase não configuradas');
 }
 
@@ -25,61 +14,5 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
     persistSession: false
   }
 });
-
-// Testa a conexão
-console.log('Testando conexão com Supabase...');
-supabase.from('usuarios').select('count').limit(1)
-  .then(({ data, error }) => {
-    if (error) {
-      console.error('Erro ao testar conexão:', error);
-      console.error('Detalhes do erro:', {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint
-      });
-    } else {
-      console.log('Conexão com Supabase estabelecida com sucesso!');
-      console.log('Teste de contagem:', data);
-
-      // Verifica a estrutura da tabela
-      console.log('Verificando estrutura da tabela...');
-      supabase.from('usuarios').select('*').limit(1)
-        .then(({ data: tableData, error: tableError }) => {
-          if (tableError) {
-            console.error('Erro ao verificar estrutura:', tableError);
-          } else if (tableData && tableData.length > 0) {
-            console.log('Estrutura da tabela:', Object.keys(tableData[0]));
-            console.log('Primeiro registro:', {
-              ...tableData[0],
-              senha: tableData[0].senha ? '***' : undefined
-            });
-          }
-        });
-
-      // Lista todos os usuários para debug
-      console.log('Listando todos os usuários...');
-      supabase.from('usuarios').select('*')
-        .then(({ data: users, error: usersError }) => {
-          if (usersError) {
-            console.error('Erro ao listar usuários:', usersError);
-          } else {
-            console.log('Total de usuários:', users.length);
-            console.log('Usuários encontrados:', users.map(u => ({
-              id: u.id,
-              email: u.email,
-              papel: u.papel,
-              status: u.status,
-              criado_em: u.criado_em,
-              atualizado_em: u.atualizado_em,
-              senha: u.senha ? '***' : undefined
-            })));
-          }
-        });
-    }
-  })
-  .catch(err => {
-    console.error('Erro ao testar conexão:', err);
-  });
 
 module.exports = supabase; 
