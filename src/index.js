@@ -60,4 +60,9 @@ app.use((req, res) => {
 });
 
 // Exporta o app para o ambiente serverless
-module.exports = app; 
+module.exports = app;
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+}); 
