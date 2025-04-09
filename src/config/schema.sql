@@ -56,37 +56,91 @@ FROM usuarios
 WHERE email = 'admin@bluepay.com';
 
 -- Tabela de Colaboradores
-CREATE TABLE IF NOT EXISTS colaboradores (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+DROP TABLE IF EXISTS colaboradores;
+CREATE TABLE colaboradores (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
-    telefone VARCHAR(20) NOT NULL,
-    departamento VARCHAR(50) NOT NULL,
+    telefone VARCHAR(20),
     cargo VARCHAR(50) NOT NULL,
     data_admissao DATE NOT NULL,
-    percentual_comissao DECIMAL(5,2) NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'ativo',
-    observacoes TEXT,
+    status VARCHAR(10) NOT NULL DEFAULT 'ativo',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Trigger para atualizar o updated_at
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
-
-CREATE TRIGGER update_colaboradores_updated_at
-    BEFORE UPDATE ON colaboradores
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-
--- Índices para melhor performance
+-- Índices para a tabela de colaboradores
+CREATE INDEX idx_colaboradores_nome ON colaboradores(nome);
 CREATE INDEX idx_colaboradores_email ON colaboradores(email);
-CREATE INDEX idx_colaboradores_departamento ON colaboradores(departamento);
 CREATE INDEX idx_colaboradores_status ON colaboradores(status);
-CREATE INDEX idx_colaboradores_cargo ON colaboradores(cargo); 
+
+-- Tabela de Clientes
+DROP TABLE IF EXISTS clientes;
+CREATE TABLE clientes (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    codigo VARCHAR(10) NOT NULL UNIQUE,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100),
+    telefone VARCHAR(20),
+    status VARCHAR(10) NOT NULL DEFAULT 'ativo',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Índices para a tabela de clientes
+CREATE INDEX idx_clientes_codigo ON clientes(codigo);
+CREATE INDEX idx_clientes_nome ON clientes(nome);
+CREATE INDEX idx_clientes_status ON clientes(status);
+
+-- Tabela de Produtos
+DROP TABLE IF EXISTS produtos;
+CREATE TABLE produtos (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    codigo VARCHAR(10) NOT NULL UNIQUE,
+    nome VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    preco DECIMAL(10,2) NOT NULL,
+    status VARCHAR(10) NOT NULL DEFAULT 'ativo',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Índices para a tabela de produtos
+CREATE INDEX idx_produtos_codigo ON produtos(codigo);
+CREATE INDEX idx_produtos_nome ON produtos(nome);
+CREATE INDEX idx_produtos_status ON produtos(status);
+
+-- Tabela de Serviços
+DROP TABLE IF EXISTS servicos;
+CREATE TABLE servicos (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    codigo VARCHAR(10) NOT NULL UNIQUE,
+    nome VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    preco DECIMAL(10,2) NOT NULL,
+    status VARCHAR(10) NOT NULL DEFAULT 'ativo',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Índices para a tabela de serviços
+CREATE INDEX idx_servicos_codigo ON servicos(codigo);
+CREATE INDEX idx_servicos_nome ON servicos(nome);
+CREATE INDEX idx_servicos_status ON servicos(status);
+
+-- Tabela de Usuários
+DROP TABLE IF EXISTS usuarios;
+CREATE TABLE usuarios (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    senha VARCHAR(100) NOT NULL,
+    perfil VARCHAR(20) NOT NULL,
+    status VARCHAR(10) NOT NULL DEFAULT 'ativo',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Índices para a tabela de usuários
+CREATE INDEX idx_usuarios_email ON usuarios(email);
+CREATE INDEX idx_usuarios_status ON usuarios(status); 

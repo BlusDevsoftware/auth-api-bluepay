@@ -4,6 +4,7 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const colaboradoresRoutes = require('./routes/colaboradores.routes');
+const clientesRoutes = require('./routes/clientes.routes');
 
 // Inicializa o Express
 const app = express();
@@ -11,7 +12,8 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: '*',
+  origin: 'https://system-blue-pay.vercel.app',
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -44,6 +46,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/colaboradores', colaboradoresRoutes);
+app.use('/api/clientes', clientesRoutes);
 
 // Middleware de erro
 app.use((err, req, res, next) => {
