@@ -21,7 +21,7 @@ const corsOptions = {
     'http://localhost:3000'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
   credentials: true,
   maxAge: 86400, // 24 horas em segundos
@@ -32,7 +32,7 @@ const corsOptions = {
 // Habilita o CORS para todas as rotas
 app.use(cors(corsOptions));
 
-// Middleware para tratar preflight requests
+// Middleware para tratar OPTIONS requests
 app.options('*', cors(corsOptions));
 
 // Middleware manual de CORS para garantir os headers em todas as respostas
