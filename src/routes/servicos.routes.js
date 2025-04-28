@@ -43,11 +43,11 @@ router.get('/:id', async (req, res) => {
 // Criar um novo serviço
 router.post('/', async (req, res) => {
     try {
-        const { codigo, nome, categoria, valor, duracao, status, descricao } = req.body;
+        const { codigo, nome, descricao, preco, status } = req.body;
         
         const { data, error } = await supabase
             .from('servicos')
-            .insert([{ codigo, nome, categoria, valor, duracao, status, descricao }])
+            .insert([{ codigo, nome, descricao, preco, status }])
             .select()
             .single();
         
@@ -63,11 +63,11 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { codigo, nome, categoria, valor, duracao, status, descricao } = req.body;
+        const { codigo, nome, descricao, preco, status } = req.body;
         
         const { data, error } = await supabase
             .from('servicos')
-            .update({ codigo, nome, categoria, valor, duracao, status, descricao })
+            .update({ codigo, nome, descricao, preco, status })
             .eq('id', id)
             .select()
             .single();
