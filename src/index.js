@@ -19,11 +19,11 @@ app.use(cors({
 }));
 
 // Rota de healthcheck
-app.get('/api', (req, res) => {
+app.get('/', (req, res) => {
   res.json({ message: 'Bem-vindo à API de Autenticação do BluePay!' });
 });
 
-app.get('/api/health', (req, res) => {
+app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
@@ -43,10 +43,10 @@ app.get('/api/health', (req, res) => {
 });
 
 // Usa as rotas
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/colaboradores', colaboradoresRoutes);
-app.use('/api/clientes', clientesRoutes);
+app.use('/auth', authRoutes);
+app.use('/users', userRoutes);
+app.use('/colaboradores', colaboradoresRoutes);
+app.use('/clientes', clientesRoutes);
 
 // Middleware de erro
 app.use((err, req, res, next) => {
