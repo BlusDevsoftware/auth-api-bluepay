@@ -1,0 +1,2 @@
+[33m3c97adf[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m fix: ajustado prefixo /api nas rotas e configuração do vercel.json
+[33m6d34c3c[m fix: corrigido caminho do arquivo principal no vercel.json
