@@ -12,7 +12,12 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: ['https://system-blue-pay.vercel.app', 'http://localhost:5500', 'https://bluepay.vercel.app'],
+  origin: [
+    'https://system-blue-pay.vercel.app',
+    'https://system-blue-8jaddh0cr-bluedevs-projects.vercel.app',
+    'http://localhost:5500',
+    'https://bluepay.vercel.app'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
