@@ -21,7 +21,7 @@ const corsOptions = {
   credentials: true,
   maxAge: 86400, // 24 horas em segundos
   preflightContinue: false,
-  optionsSuccessStatus: 204
+  optionsSuccessStatus: 200 // Alterado de 204 para 200
 };
 
 // Habilita o CORS para todas as rotas
@@ -80,6 +80,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Rotas públicas
+app.use('/api/auth', authRoutes);
 app.use('/api/servicos', servicosRoutes);
 
 // Rotas protegidas
@@ -93,9 +94,6 @@ protectedRouter.use('/clientes', clientesRoutes);
 
 // Adiciona o router protegido à aplicação
 app.use('/api', protectedRouter);
-
-// Usa as rotas públicas
-app.use('/api/auth', authRoutes);
 
 // Middleware de erro
 app.use((err, req, res, next) => {
