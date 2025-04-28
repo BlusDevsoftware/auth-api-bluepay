@@ -21,30 +21,11 @@ const corsOptions = {
   credentials: true,
   maxAge: 86400, // 24 horas em segundos
   preflightContinue: false,
-  optionsSuccessStatus: 200 // Alterado de 204 para 200
+  optionsSuccessStatus: 204
 };
 
 // Habilita o CORS para todas as rotas
 app.use(cors(corsOptions));
-
-// Middleware para tratar preflight requests
-app.options('*', cors(corsOptions));
-
-// Middleware manual de CORS para garantir os headers em todas as respostas
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (corsOptions.origin.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  }
-  res.header('Access-Control-Allow-Methods', corsOptions.methods.join(','));
-  res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(','));
-  res.header('Access-Control-Allow-Credentials', 'true');
-  
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end();
-  }
-  next();
-});
 
 // Outros middlewares
 app.use(express.json());
@@ -79,21 +60,21 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Rotas públicas
-app.use('/api/auth', authRoutes);
-app.use('/api/servicos', servicosRoutes);
-
 // Rotas protegidas
 const protectedRouter = express.Router();
 protectedRouter.use(authMiddleware);
 
 // Adiciona as rotas protegidas
 protectedRouter.use('/users', usersRoutes);
+protectedRouter.use('/servicos', servicosRoutes);
 protectedRouter.use('/colaboradores', colaboradoresRoutes);
 protectedRouter.use('/clientes', clientesRoutes);
 
 // Adiciona o router protegido à aplicação
 app.use('/api', protectedRouter);
+
+// Usa as rotas públicas
+app.use('/api/auth', authRoutes);
 
 // Middleware de erro
 app.use((err, req, res, next) => {
