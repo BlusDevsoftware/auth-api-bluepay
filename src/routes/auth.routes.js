@@ -7,10 +7,9 @@ const supabase = require('../config/supabase');
 // Login
 router.post('/login', async (req, res) => {
   try {
-    const { email, senha, password } = req.body;
-    const userPassword = senha || password;
+    const { email, senha } = req.body;
 
-    if (!email || !userPassword) {
+    if (!email || !senha) {
       return res.status(400).json({
         success: false,
         message: 'Email e senha são obrigatórios'
@@ -44,7 +43,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Verifica a senha
-    const isValidPassword = await bcrypt.compare(userPassword, user.senha);
+    const isValidPassword = await bcrypt.compare(senha, user.senha);
     
     if (!isValidPassword) {
       console.log('Senha inválida para o usuário:', email);

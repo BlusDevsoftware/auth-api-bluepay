@@ -34,6 +34,14 @@ function validateColaborador(colaborador) {
         errors.push('Status inválido');
     }
     
+    // Validar usuario_id apenas se estiver presente
+    if (colaborador.usuario_id !== undefined && colaborador.usuario_id !== null) {
+        // Verificar se é uma string não vazia
+        if (typeof colaborador.usuario_id !== 'string' || !colaborador.usuario_id.trim()) {
+            errors.push('ID de usuário inválido');
+        }
+    }
+    
     return errors;
 }
 
@@ -120,7 +128,9 @@ router.post('/', async (req, res) => {
             telefone: req.body.telefone,
             cargo: req.body.cargo,
             data_admissao: req.body.data_admissao,
-            status: req.body.status || 'ativo'
+            status: req.body.status || 'ativo',
+            departamento: req.body.departamento || 'Não especificado',
+            usuario_id: req.body.usuario_id || null
         };
         
         const errors = validateColaborador(colaborador);
@@ -147,6 +157,44 @@ router.post('/', async (req, res) => {
                 message: 'Colaborador já existe',
                 details: 'Já existe um colaborador com este email'
             });
+        }
+        
+        // Se houver um usuario_id, verificar se o usuário existe
+        if (colaborador.usuario_id) {
+            const { data: existingUser, error: userCheckError } = await supabase
+                .from('usuarios')
+                .select('id')
+                .eq('id', colaborador.usuario_id)
+                .single();
+                
+            if (userCheckError && userCheckError.code !== 'PGRST116') {
+                throw userCheckError;
+            }
+            
+            if (!existingUser) {
+                return res.status(400).json({
+                    message: 'Usuário não encontrado',
+                    details: 'O usuário informado não existe'
+                });
+            }
+            
+            // Verificar se o usuário já está vinculado a outro colaborador
+            const { data: linkedColaborador, error: linkedCheckError } = await supabase
+                .from('colaboradores')
+                .select('id')
+                .eq('usuario_id', colaborador.usuario_id)
+                .single();
+                
+            if (linkedCheckError && linkedCheckError.code !== 'PGRST116') {
+                throw linkedCheckError;
+            }
+            
+            if (linkedColaborador) {
+                return res.status(400).json({
+                    message: 'Usuário já vinculado',
+                    details: 'Este usuário já está vinculado a outro colaborador'
+                });
+            }
         }
         
         // Inserir novo colaborador
@@ -177,7 +225,9 @@ router.put('/:id', async (req, res) => {
             telefone: req.body.telefone,
             cargo: req.body.cargo,
             data_admissao: req.body.data_admissao,
-            status: req.body.status
+            status: req.body.status,
+            departamento: req.body.departamento || 'Não especificado',
+            usuario_id: req.body.usuario_id || null
         };
         
         const errors = validateColaborador(colaborador);
@@ -221,6 +271,45 @@ router.put('/:id', async (req, res) => {
                 message: 'Email já existe',
                 details: 'Já existe outro colaborador com este email'
             });
+        }
+        
+        // Se houver um usuario_id, verificar se o usuário existe
+        if (colaborador.usuario_id) {
+            const { data: existingUser, error: userCheckError } = await supabase
+                .from('usuarios')
+                .select('id')
+                .eq('id', colaborador.usuario_id)
+                .single();
+                
+            if (userCheckError && userCheckError.code !== 'PGRST116') {
+                throw userCheckError;
+            }
+            
+            if (!existingUser) {
+                return res.status(400).json({
+                    message: 'Usuário não encontrado',
+                    details: 'O usuário informado não existe'
+                });
+            }
+            
+            // Verificar se o usuário já está vinculado a outro colaborador
+            const { data: linkedColaborador, error: linkedCheckError } = await supabase
+                .from('colaboradores')
+                .select('id')
+                .eq('usuario_id', colaborador.usuario_id)
+                .neq('id', req.params.id)
+                .single();
+                
+            if (linkedCheckError && linkedCheckError.code !== 'PGRST116') {
+                throw linkedCheckError;
+            }
+            
+            if (linkedColaborador) {
+                return res.status(400).json({
+                    message: 'Usuário já vinculado',
+                    details: 'Este usuário já está vinculado a outro colaborador'
+                });
+            }
         }
         
         // Atualizar colaborador
