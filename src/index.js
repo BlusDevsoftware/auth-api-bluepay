@@ -1,6 +1,9 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const authMiddleware = require('./middleware/auth.middleware');
+const usersRoutes = require('./routes/users.routes');
+const servicosRoutes = require('./routes/servicos.routes');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const colaboradoresRoutes = require('./routes/colaboradores.routes');
@@ -9,44 +12,90 @@ const clientesRoutes = require('./routes/clientes.routes');
 // Inicializa o Express
 const app = express();
 
-// Middleware
-app.use(express.json());
-app.use(cors({
-  origin: 'https://system-blue-pay.vercel.app',
+// Configuração do CORS - deve vir antes de qualquer outro middleware
+const corsOptions = {
+  origin: ['https://system-blue-pay.vercel.app', 'https://system-blue-2muagxayq-bluedevs-projects.vercel.app', 'http://localhost:3000'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+  maxAge: 86400, // 24 horas em segundos
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
 
-// Rota de healthcheck
+// Habilita o CORS para todas as rotas
+app.use(cors(corsOptions));
+
+// Middleware para tratar preflight requests
+app.options('*', cors(corsOptions));
+
+// Middleware manual de CORS para garantir os headers em todas as respostas
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (corsOptions.origin.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  res.header('Access-Control-Allow-Methods', corsOptions.methods.join(','));
+  res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(','));
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+  next();
+});
+
+// Outros middlewares
+app.use(express.json());
+
+// Rotas públicas (sem autenticação)
 app.get('/', (req, res) => {
-  res.json({ message: 'Bem-vindo à API de Autenticação do BluePay!' });
+  res.json({ 
+    message: 'API de Autenticação BluePay',
+    version: '1.0.0',
+    status: 'online',
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/api/public/test', (req, res) => {
+  res.json({ 
+    message: 'Rota pública funcionando!',
+    cors: 'Se você está vendo esta mensagem, o CORS está configurado corretamente.',
+    timestamp: new Date().toISOString()
+  });
 });
 
 app.get('/api/health', (req, res) => {
-  res.json({
+  res.json({ 
     status: 'ok',
     timestamp: new Date().toISOString(),
-    version: '1.0.0',
-    env: {
-      nodeEnv: process.env.NODE_ENV,
-      hasSupabaseUrl: !!process.env.SUPABASE_URL,
-      hasSupabaseKey: !!process.env.SUPABASE_KEY,
-      hasJwtSecret: !!process.env.JWT_SECRET,
-      hasJwtExpires: !!process.env.JWT_EXPIRES_IN,
-      supabaseUrlLength: process.env.SUPABASE_URL ? process.env.SUPABASE_URL.length : 0,
-      supabaseKeyLength: process.env.SUPABASE_KEY ? process.env.SUPABASE_KEY.length : 0,
-      supabaseUrlStartsWith: process.env.SUPABASE_URL ? process.env.SUPABASE_URL.substring(0, 10) : '',
-      supabaseKeyStartsWith: process.env.SUPABASE_KEY ? process.env.SUPABASE_KEY.substring(0, 10) : ''
+    env: process.env.NODE_ENV || 'production',
+    cors: {
+      origins: corsOptions.origin,
+      methods: corsOptions.methods.join(',')
     }
   });
 });
 
-// Usa as rotas
+// Rotas públicas
+app.use('/api/servicos', servicosRoutes);
+
+// Rotas protegidas
+const protectedRouter = express.Router();
+protectedRouter.use(authMiddleware);
+
+// Adiciona as rotas protegidas
+protectedRouter.use('/users', usersRoutes);
+protectedRouter.use('/colaboradores', colaboradoresRoutes);
+protectedRouter.use('/clientes', clientesRoutes);
+
+// Adiciona o router protegido à aplicação
+app.use('/api', protectedRouter);
+
+// Usa as rotas públicas
 app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/colaboradores', colaboradoresRoutes);
-app.use('/api/clientes', clientesRoutes);
 
 // Middleware de erro
 app.use((err, req, res, next) => {
@@ -61,6 +110,11 @@ app.use((err, req, res, next) => {
 // Rota 404
 app.use((req, res) => {
   res.status(404).json({ message: 'Rota não encontrada' });
+});
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
 });
 
 // Exporta o app para o ambiente serverless
