@@ -16,7 +16,7 @@ const app = express();
 const corsOptions = {
   origin: ['https://system-blue-pay.vercel.app', 'https://system-blue-2muagxayq-bluedevs-projects.vercel.app', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
   credentials: true,
   maxAge: 86400, // 24 horas em segundos
@@ -27,19 +27,47 @@ const corsOptions = {
 // Habilita o CORS para todas as rotas
 app.use(cors(corsOptions));
 
-// Outros middlewares
-app.use(express.json());
+// Middleware para tratar preflight requests
+app.options('*', cors(corsOptions));
 
-// Rotas públicas (sem autenticação)
-app.get('/', (req, res) => {
-  res.json({ 
-    message: 'API de Autenticação BluePay',
-    version: '1.0.0',
-    status: 'online',
-    timestamp: new Date().toISOString()
-  });
+// Middleware manual de CORS para garantir os headers em todas as respostas
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (corsOptions.origin.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  res.header('Access-Control-Allow-Methods', corsOptions.methods.join(','));
+  res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(','));
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Max-Age', '86400');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+  next();
 });
 
+// Middleware para processar JSON
+app.use(express.json());
+
+// Rotas públicas
+app.use('/api/auth', authRoutes);
+app.use('/api/public', userRoutes);
+
+// Middleware de autenticação para rotas protegidas
+const protectedRouter = express.Router();
+protectedRouter.use(authMiddleware);
+
+// Rotas protegidas
+protectedRouter.use('/users', usersRoutes);
+protectedRouter.use('/servicos', servicosRoutes);
+protectedRouter.use('/colaboradores', colaboradoresRoutes);
+protectedRouter.use('/clientes', clientesRoutes);
+
+// Adiciona o router protegido à aplicação
+app.use('/api', protectedRouter);
+
+// Rota de teste para verificar se a API está funcionando
 app.get('/api/public/test', (req, res) => {
   res.json({ 
     message: 'Rota pública funcionando!',
@@ -48,6 +76,7 @@ app.get('/api/public/test', (req, res) => {
   });
 });
 
+// Rota de healthcheck
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok',
@@ -59,22 +88,6 @@ app.get('/api/health', (req, res) => {
     }
   });
 });
-
-// Rotas protegidas
-const protectedRouter = express.Router();
-protectedRouter.use(authMiddleware);
-
-// Adiciona as rotas protegidas
-protectedRouter.use('/users', usersRoutes);
-protectedRouter.use('/servicos', servicosRoutes);
-protectedRouter.use('/colaboradores', colaboradoresRoutes);
-protectedRouter.use('/clientes', clientesRoutes);
-
-// Adiciona o router protegido à aplicação
-app.use('/api', protectedRouter);
-
-// Usa as rotas públicas
-app.use('/api/auth', authRoutes);
 
 // Middleware de erro
 app.use((err, req, res, next) => {
@@ -91,9 +104,10 @@ app.use((req, res) => {
   res.status(404).json({ message: 'Rota não encontrada' });
 });
 
-const PORT = process.env.PORT || 3001;
+// Inicia o servidor
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
 
 // Exporta o app para o ambiente serverless
