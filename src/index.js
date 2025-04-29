@@ -17,8 +17,7 @@ app.use(cors({
     'https://system-blue-pay.vercel.app',
     'https://system-blue-8jaddh0cr-bluedevs-projects.vercel.app',
     'http://localhost:5500',
-    'https://bluepay.vercel.app',
-    'https://www.postman.com'
+    'https://bluepay.vercel.app'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -33,7 +32,8 @@ app.use(cors({
     'Content-MD5',
     'Date',
     'X-Api-Version'
-  ]
+  ],
+  exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar']
 }));
 
 // Rota de healthcheck
