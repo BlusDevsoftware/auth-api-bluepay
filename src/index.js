@@ -5,7 +5,7 @@ const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const colaboradoresRoutes = require('./routes/colaboradores.routes');
 const clientesRoutes = require('./routes/clientes.routes');
-const servicosRoutes = require('./routes/servicos.routes');
+const servicosRoutes = require('./routes/servicos.routes'); // Rota de serviços
 
 // Inicializa o Express
 const app = express();
