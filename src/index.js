@@ -19,7 +19,8 @@ app.use(cors({
     'https://system-blue-pay.vercel.app',
     'https://system-blue-8jaddh0cr-bluedevs-projects.vercel.app',
     'http://localhost:5500',
-    'https://bluepay.vercel.app'
+    'https://bluepay.vercel.app',
+    'https://system-blue-8jaddh0cr-bluedevs-projects.vercel.app'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
