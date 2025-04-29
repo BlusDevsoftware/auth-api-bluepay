@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { supabase } = require('../config/supabaseClient');
+const supabase = require('../config/supabase');
+const authMiddleware = require('../middleware/auth.middleware');
+
+// Middleware de autenticação para todas as rotas
+router.use(authMiddleware);
 
 // Validação de serviço
 function validateServico(servico) {
