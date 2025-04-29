@@ -6,6 +6,8 @@ const userRoutes = require('./routes/user.routes');
 const colaboradoresRoutes = require('./routes/colaboradores.routes');
 const clientesRoutes = require('./routes/clientes.routes');
 const servicosRoutes = require('./routes/servicos.routes'); // Rota de serviços
+const comissoesRoutes = require('./routes/comissoes.routes');
+const relatoriosRoutes = require('./routes/relatorios.routes');
 
 // Inicializa o Express
 const app = express();
@@ -66,6 +68,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/colaboradores', colaboradoresRoutes);
 app.use('/api/clientes', clientesRoutes);
 app.use('/api/servicos', servicosRoutes);
+app.use('/api/comissoes', comissoesRoutes);
+app.use('/api/relatorios', relatoriosRoutes);
 
 // Middleware de erro
 app.use((err, req, res, next) => {
