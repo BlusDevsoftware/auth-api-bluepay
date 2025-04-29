@@ -22,7 +22,7 @@
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://system-blue-8jaddh0cr-bluedevs-projects.vercel.app"
+          "value": "*"
         },
         {
           "key": "Access-Control-Allow-Methods",

@@ -101,14 +101,6 @@ router.post('/', async (req, res) => {
             status: req.body.status || 'ativo'
         };
         
-        const errors = validateServico(servico);
-        if (errors.length > 0) {
-            return res.status(400).json({
-                message: 'Dados inválidos',
-                errors
-            });
-        }
-        
         // Verificar se já existe um serviço com o mesmo código
         const { data: existingServico, error: checkError } = await supabase
             .from('servicos')
@@ -158,14 +150,6 @@ router.put('/:id', async (req, res) => {
             descricao: req.body.descricao || null,
             status: req.body.status || 'ativo'
         };
-        
-        const errors = validateServico(servico);
-        if (errors.length > 0) {
-            return res.status(400).json({
-                message: 'Dados inválidos',
-                errors
-            });
-        }
         
         // Verificar se já existe outro serviço com o mesmo código
         const { data: existingServico, error: checkError } = await supabase
