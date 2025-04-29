@@ -8,19 +8,7 @@
   ],
   "routes": [
     {
-      "src": "/api/servicos",
-      "dest": "src/index.js"
-    },
-    {
-      "src": "/api/servicos/(.*)",
-      "dest": "src/index.js"
-    },
-    {
       "src": "/api/(.*)",
-      "dest": "src/index.js"
-    },
-    {
-      "src": "/(.*)",
       "dest": "src/index.js"
     }
   ],
