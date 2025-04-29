@@ -31,189 +31,156 @@ function validateServico(servico) {
 
 // Listar todos os serviços
 router.get('/', async (req, res) => {
-    try {
-        console.log('Iniciando listagem de serviços...');
-        
-        const { data, error } = await supabase
-            .from('servicos')
-            .select('*')
-            .order('codigo');
-            
-        if (error) {
-            console.error('Erro do Supabase:', error);
-            throw error;
-        }
-        
-        console.log('Serviços recuperados com sucesso:', data.length);
-        res.json(data);
-    } catch (error) {
-        console.error('Erro detalhado ao listar serviços:', {
-            message: error.message,
-            code: error.code,
-            details: error.details
-        });
-        
-        res.status(500).json({
-            message: 'Erro ao listar serviços',
-            error: error.message,
-            details: error.details || 'Sem detalhes adicionais'
-        });
-    }
+  try {
+    const { data: servicos, error } = await supabase
+      .from('servicos')
+      .select('*')
+      .order('codigo');
+
+    if (error) throw error;
+
+    res.json(servicos);
+  } catch (error) {
+    console.error('Erro ao listar serviços:', error);
+    res.status(500).json({ message: 'Erro ao listar serviços' });
+  }
 });
 
 // Buscar serviço por ID
 router.get('/:id', async (req, res) => {
-    try {
-        const { data, error } = await supabase
-            .from('servicos')
-            .select('*')
-            .eq('id', req.params.id)
-            .single();
-            
-        if (error) throw error;
-        
-        if (!data) {
-            return res.status(404).json({
-                message: 'Serviço não encontrado'
-            });
-        }
-        
-        res.json(data);
-    } catch (error) {
-        console.error('Erro ao buscar serviço:', error);
-        res.status(500).json({
-            message: 'Erro ao buscar serviço',
-            error: error.message
-        });
+  try {
+    const { id } = req.params;
+
+    const { data: servico, error } = await supabase
+      .from('servicos')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      return res.status(404).json({ message: 'Serviço não encontrado' });
     }
+
+    res.json(servico);
+  } catch (error) {
+    console.error('Erro ao buscar serviço:', error);
+    res.status(500).json({ message: 'Erro ao buscar serviço' });
+  }
 });
 
 // Criar novo serviço
 router.post('/', async (req, res) => {
-    try {
-        const servico = {
-            codigo: req.body.codigo,
-            nome: req.body.nome,
-            categoria: req.body.categoria || null,
-            valor: req.body.valor,
-            duracao: req.body.duracao || null,
-            descricao: req.body.descricao || null,
-            status: req.body.status || 'ativo'
-        };
-        
-        // Verificar se já existe um serviço com o mesmo código
-        const { data: existingServico, error: checkError } = await supabase
-            .from('servicos')
-            .select('id')
-            .eq('codigo', servico.codigo)
-            .single();
-            
-        if (checkError && checkError.code !== 'PGRST116') {
-            throw checkError;
-        }
-        
-        if (existingServico) {
-            return res.status(400).json({
-                message: 'Serviço já existe',
-                details: 'Já existe um serviço com este código'
-            });
-        }
-        
-        // Inserir novo serviço
-        const { data, error } = await supabase
-            .from('servicos')
-            .insert([servico])
-            .select()
-            .single();
-            
-        if (error) throw error;
-        
-        res.status(201).json(data);
-    } catch (error) {
-        console.error('Erro ao criar serviço:', error);
-        res.status(500).json({
-            message: 'Erro ao criar serviço',
-            error: error.message
-        });
+  try {
+    const { codigo, nome, categoria, valor, duracao, descricao, status } = req.body;
+
+    // Verifica se o código já está em uso
+    const { data: existingServico } = await supabase
+      .from('servicos')
+      .select('*')
+      .eq('codigo', codigo)
+      .single();
+
+    if (existingServico) {
+      return res.status(400).json({ message: 'Código já cadastrado' });
     }
+
+    // Cria o serviço
+    const servicoData = {
+      codigo,
+      nome,
+      categoria,
+      valor,
+      duracao,
+      descricao,
+      status: status || 'ativo'
+    };
+
+    const { data: newServico, error } = await supabase
+      .from('servicos')
+      .insert([servicoData])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Erro ao criar serviço:', error);
+      return res.status(400).json({ message: 'Erro ao criar serviço' });
+    }
+
+    res.status(201).json(newServico);
+  } catch (error) {
+    console.error('Erro ao criar serviço:', error);
+    res.status(500).json({ message: 'Erro ao criar serviço' });
+  }
 });
 
 // Atualizar serviço
 router.put('/:id', async (req, res) => {
-    try {
-        const servico = {
-            codigo: req.body.codigo,
-            nome: req.body.nome,
-            categoria: req.body.categoria || null,
-            valor: req.body.valor,
-            duracao: req.body.duracao || null,
-            descricao: req.body.descricao || null,
-            status: req.body.status || 'ativo'
-        };
-        
-        // Verificar se já existe outro serviço com o mesmo código
-        const { data: existingServico, error: checkError } = await supabase
-            .from('servicos')
-            .select('id')
-            .eq('codigo', servico.codigo)
-            .neq('id', req.params.id)
-            .single();
-            
-        if (checkError && checkError.code !== 'PGRST116') {
-            throw checkError;
-        }
-        
-        if (existingServico) {
-            return res.status(400).json({
-                message: 'Serviço já existe',
-                details: 'Já existe outro serviço com este código'
-            });
-        }
-        
-        // Atualizar serviço
-        const { data, error } = await supabase
-            .from('servicos')
-            .update(servico)
-            .eq('id', req.params.id)
-            .select()
-            .single();
-            
-        if (error) throw error;
-        
-        if (!data) {
-            return res.status(404).json({
-                message: 'Serviço não encontrado'
-            });
-        }
-        
-        res.json(data);
-    } catch (error) {
-        console.error('Erro ao atualizar serviço:', error);
-        res.status(500).json({
-            message: 'Erro ao atualizar serviço',
-            error: error.message
-        });
+  try {
+    const { id } = req.params;
+    const { codigo, nome, categoria, valor, duracao, descricao, status } = req.body;
+
+    // Verifica se o código já está em uso por outro serviço
+    const { data: existingServico } = await supabase
+      .from('servicos')
+      .select('*')
+      .eq('codigo', codigo)
+      .neq('id', id)
+      .single();
+
+    if (existingServico) {
+      return res.status(400).json({ message: 'Código já cadastrado' });
     }
+
+    const updateData = {
+      codigo,
+      nome,
+      categoria,
+      valor,
+      duracao,
+      descricao,
+      status,
+      updated_at: new Date()
+    };
+
+    const { data: updatedServico, error } = await supabase
+      .from('servicos')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Erro ao atualizar serviço:', error);
+      return res.status(400).json({ message: 'Erro ao atualizar serviço' });
+    }
+
+    res.json(updatedServico);
+  } catch (error) {
+    console.error('Erro ao atualizar serviço:', error);
+    res.status(500).json({ message: 'Erro ao atualizar serviço' });
+  }
 });
 
-// Excluir serviço
+// Deletar serviço
 router.delete('/:id', async (req, res) => {
-    try {
-        const { error } = await supabase
-            .from('servicos')
-            .delete()
-            .eq('id', req.params.id);
-            
-        if (error) throw error;
-        
-        res.status(204).send();
-    } catch (error) {
-        console.error('Erro ao excluir serviço:', error);
-        res.status(500).json({
-            message: 'Erro ao excluir serviço',
-            error: error.message
-        });
+  try {
+    const { id } = req.params;
+
+    const { error } = await supabase
+      .from('servicos')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Erro ao deletar serviço:', error);
+      return res.status(400).json({ message: 'Erro ao deletar serviço' });
     }
+
+    res.json({ message: 'Serviço deletado com sucesso' });
+  } catch (error) {
+    console.error('Erro ao deletar serviço:', error);
+    res.status(500).json({ message: 'Erro ao deletar serviço' });
+  }
 });
 
 module.exports = router; 
