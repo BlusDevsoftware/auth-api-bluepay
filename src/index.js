@@ -5,7 +5,7 @@ const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const colaboradoresRoutes = require('./routes/colaboradores.routes');
 const clientesRoutes = require('./routes/clientes.routes');
-const servicosRoutes = require('./routes/servicos.routes'); // Rota de serviços
+const servicosRoutes = require('./routes/servicos.routes');
 const comissoesRoutes = require('./routes/comissoes.routes');
 const relatoriosRoutes = require('./routes/relatorios.routes');
 
@@ -84,6 +84,7 @@ app.use((err, req, res, next) => {
 
 // Rota 404
 app.use((req, res) => {
+  console.error('Rota não encontrada:', req.path);
   res.status(404).json({ message: 'Rota não encontrada' });
 });
 
