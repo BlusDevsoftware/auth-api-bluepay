@@ -8,6 +8,10 @@
   ],
   "routes": [
     {
+      "src": "/api/servicos",
+      "dest": "src/index.js"
+    },
+    {
       "src": "/api/servicos/(.*)",
       "dest": "src/index.js"
     },
